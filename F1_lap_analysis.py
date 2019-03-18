@@ -46,7 +46,7 @@ def plot_times(lap_times):
     drivers_of_interest = ['Sebastian VETTEL', 'Charles LECLERC',
                        'Lewis HAMILTON', 'Valtteri BOTTAS',
                        'Max VERSTAPPEN']
-
+    #drivers_of_interest = DRIVERS
 #    drivers_of_interest = ['Charles LECLERC',
 #                           'Max VERSTAPPEN']    
     
@@ -55,7 +55,7 @@ def plot_times(lap_times):
     plt.figure(figsize=FIG_SIZE)
     plt.xlabel('Lap Number')
     plt.ylabel('Lap Time (seconds)')
-    
+    plt.title('2019 Australian Grand Prix')
     # change ylim and xticks based on race track
     plt.ylim((85,95))
     plt.xticks([i for i in range(0, 60, 5)], rotation=90)
@@ -66,9 +66,48 @@ def plot_times(lap_times):
                       label=driver.split(' ')[1][:3])
 #            plt.text(len(times)-1, times[-1], driver.split(' ')[1][:3],
 #                   fontsize=10)
-        
+    
+    plt.grid(axis='y', linestyle='--')
     plt.legend()
-
+    
+def plot_percent_times(lap_times):
+    drivers_of_interest = ['Sebastian VETTEL', 'Charles LECLERC',
+                       'Lewis HAMILTON', 'Valtteri BOTTAS',
+                       'Max VERSTAPPEN']
+    # find out the fastest lap of the race
+    fastest_lap = 1000
+    for driver, times in lap_times.items():
+        curr_best = min(lap_times[driver])
+        if curr_best < fastest_lap:
+            fastest_lap = curr_best
+            fastest_driver = driver
+    # convert all laps to percentage of fastest lap
+    percent_times = {}
+    for driver, times in lap_times.items():
+        percent_times[driver] = []
+        for curr in times:
+            percent_times[driver].append(curr/fastest_lap*100)
+            
+    # Configure pyplot
+    plt.style.use('tableau-colorblind10')
+    plt.figure(figsize=FIG_SIZE)
+    plt.xlabel('Lap Number')
+    plt.ylabel('Percent of fastest lap')
+    plt.title('2019 Australian Grand Prix')
+    # change ylim and xticks based on race track
+    plt.ylim((99, 108))
+    plt.xticks([i for i in range(0, 60, 5)], rotation=90)
+    for driver, times in percent_times.items():
+        if driver in drivers_of_interest:
+            plt.plot([i for i in range(len(times))], times, 'o-',
+                      linewidth=1, markersize=2.5,
+                      label=driver.split(' ')[1][:3])
+        
+    plt.grid(axis='y', linestyle='--')
+    plt.legend()
+    
+    return percent_times
+            
 if __name__ == '__main__':
     pdfFileObj = open(FILE, 'rb')
     pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
@@ -77,3 +116,4 @@ if __name__ == '__main__':
     lap_times = get_lap_times(pdfReader, DRIVERS)
 
     plot_times(lap_times)
+    percent_times = plot_percent_times(lap_times)
